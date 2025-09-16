@@ -11,6 +11,9 @@ class Signup(Resource):
     def post(self):
         json = request.get_json()
         
+        if not json or not json.get('username') or not json.get('password'):
+            return {'error': '422 Unprocessable Entity'}, 422
+        
         user = User(
             username=json.get('username'),
             image_url=json.get('image_url'),
@@ -27,7 +30,7 @@ class Signup(Resource):
             
             return user.to_dict(), 201
         
-        except IntegrityError:
+        except (IntegrityError, ValueError):
             return {'error': '422 Unprocessable Entity'}, 422
 
 class CheckSession(Resource):
@@ -36,13 +39,17 @@ class CheckSession(Resource):
         
         if user_id:
             user = User.query.filter(User.id == user_id).first()
-            return user.to_dict(), 200
+            if user:
+                return user.to_dict(), 200
         
         return {'error': '401 Unauthorized'}, 401
 
 class Login(Resource):
     def post(self):
         json = request.get_json()
+        
+        if not json or not json.get('username') or not json.get('password'):
+            return {'error': '401 Unauthorized'}, 401
         
         user = User.query.filter(User.username == json.get('username')).first()
         
@@ -73,6 +80,9 @@ class RecipeIndex(Resource):
             return {'error': '401 Unauthorized'}, 401
         
         json = request.get_json()
+        
+        if not json:
+            return {'error': '422 Unprocessable Entity'}, 422
         
         try:
             recipe = Recipe(

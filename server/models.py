@@ -27,6 +27,8 @@ class User(db.Model, SerializerMixin):
         self._password_hash = password_hash.decode('utf-8')
     
     def authenticate(self, password):
+        if not self._password_hash or not password:
+            return False
         return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
 
 class Recipe(db.Model, SerializerMixin):
@@ -42,6 +44,6 @@ class Recipe(db.Model, SerializerMixin):
     
     @validates('instructions')
     def validate_instructions(self, key, instructions):
-        if len(instructions) < 50:
+        if not instructions or len(instructions) < 50:
             raise ValueError('Instructions must be at least 50 characters long')
         return instructions
