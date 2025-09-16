@@ -30,7 +30,8 @@ class Signup(Resource):
             
             return user.to_dict(), 201
         
-        except (IntegrityError, ValueError):
+        except (IntegrityError, ValueError) as e:
+            db.session.rollback()
             return {'error': '422 Unprocessable Entity'}, 422
 
 class CheckSession(Resource):
@@ -97,7 +98,8 @@ class RecipeIndex(Resource):
             
             return recipe.to_dict(), 201
         
-        except (IntegrityError, ValueError):
+        except (IntegrityError, ValueError) as e:
+            db.session.rollback()
             return {'error': '422 Unprocessable Entity'}, 422
 
 api.add_resource(Signup, '/signup', endpoint='signup')
